@@ -79,14 +79,16 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                 className="btn-primary"
                 onClick={() => setMode('signup')}
               >
-                Create Free Account
+                <Icon name="user" size={18} />
+                <span>Sign Up</span>
               </button>
               <button
                 type="button"
                 className="btn-secondary"
                 onClick={() => setMode('login')}
               >
-                Sign In to Existing Account
+                <Icon name="log-in" size={18} />
+                <span>Log In</span>
               </button>
             </div>
           </div>

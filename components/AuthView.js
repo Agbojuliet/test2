@@ -189,10 +189,10 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
                 setError('');
                 setScreen('signup');
               }}
-              style={{ fontSize: '16px', padding: '15px' }}
+              style={{ fontSize: '15px', padding: '14px' }}
             >
               <Icon name="user" size={18} />
-              <span>Sign Up — Get Started</span>
+              <span>Sign Up</span>
             </button>
 
             <button
@@ -202,9 +202,10 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
                 setError('');
                 setScreen('login');
               }}
-              style={{ padding: '14px', fontSize: '14px' }}
+              style={{ padding: '14px', fontSize: '15px' }}
             >
-              <span>I already have an account (Log In)</span>
+              <Icon name="log-in" size={18} />
+              <span>Log In</span>
             </button>
 
             <button
