@@ -40,8 +40,8 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
 
   const handleUseDemo = () => {
     onAuthSuccess({
-      name: 'Alex Johnson',
-      email: 'alex.johnson@example.com',
+      name: 'Amaka Juliet',
+      email: 'amaka.juliet@example.com',
       isNewUser: false,
     });
   };
@@ -221,7 +221,7 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
                 textDecoration: 'underline',
               }}
             >
-              Or explore with Demo Profile (Alex Johnson)
+              Or explore with Demo Profile (Amaka Juliet)
             </button>
           </div>
         </div>
@@ -277,7 +277,7 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
               <input
                 type="text"
                 className="form-input"
-                placeholder="e.g. Alex Johnson"
+                placeholder="e.g. Amaka Juliet"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 autoFocus
@@ -290,7 +290,7 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
               <input
                 type="email"
                 className="form-input"
-                placeholder="alex@example.com"
+                placeholder="amaka@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -379,7 +379,7 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
               <input
                 type="email"
                 className="form-input"
-                placeholder="alex.johnson@example.com"
+                placeholder="amaka.juliet@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoFocus
@@ -422,7 +422,7 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
               type="button"
               className="prompt-pill"
               onClick={() => {
-                setEmail('alex.johnson@example.com');
+                setEmail('amaka.juliet@example.com');
                 setPassword('password123');
               }}
               style={{ fontSize: '11px' }}

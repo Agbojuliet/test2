@@ -65,7 +65,7 @@ export default function MobileFrame({
               </div>
               <div>
                 <div className="greeting-text">Welcome back</div>
-                <div className="user-name">{user?.name || 'Alex Johnson'}</div>
+                <div className="user-name">{user?.name || 'Amaka Juliet'}</div>
               </div>
             </div>
 

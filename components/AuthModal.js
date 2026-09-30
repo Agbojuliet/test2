@@ -17,7 +17,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
 
     onLoginSuccess({
       email,
-      name: name || (mode === 'signup' ? 'New Member' : 'Alex Johnson'),
+      name: name || (mode === 'signup' ? 'New Member' : 'Amaka Juliet'),
     });
     onClose();
   };
@@ -110,7 +110,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                 <input
                   type="email"
                   className="form-input"
-                  placeholder="alex.johnson@example.com"
+                  placeholder="amaka.juliet@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -162,7 +162,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="Alex Johnson"
+                  placeholder="Amaka Juliet"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
@@ -174,7 +174,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                 <input
                   type="email"
                   className="form-input"
-                  placeholder="alex@example.com"
+                  placeholder="amaka@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
