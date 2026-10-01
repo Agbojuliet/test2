@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import Icon from './Icons';
 
 export default function MobileFrame({
@@ -14,28 +13,13 @@ export default function MobileFrame({
   isAuthenticated = true,
   bottomNav,
 }) {
-  const [isFullWidth, setIsFullWidth] = useState(false);
-
   return (
-    <div className={`app-viewport-wrapper ${isFullWidth ? 'full-width-mode' : ''}`}>
-      {/* Desktop Helper Bar */}
-      <div className="desktop-controls-bar">
-        <span>Mobile-First AI Budget Assistant</span>
-        <button
-          type="button"
-          className="device-toggle-btn"
-          onClick={() => setIsFullWidth(!isFullWidth)}
-        >
-          <Icon name="smartphone" size={14} />
-          <span>{isFullWidth ? 'Switch to Phone Frame' : 'Expand View'}</span>
-        </button>
-      </div>
-
+    <div className="app-viewport-wrapper">
       {/* Mobile Device Frame */}
       <div className="mobile-device-frame">
         {/* Top App Header (Only when logged in) */}
         {isAuthenticated && (
-          <div className="app-header-wrapper" style={{ padding: '16px 18px 0 18px' }}>
+          <div className="app-header-wrapper">
             <header className="app-header">
               <div className="user-profile-badge" onClick={onOpenSettings}>
                 <div className="user-avatar">

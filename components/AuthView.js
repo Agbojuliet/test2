@@ -40,7 +40,7 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
 
 
   return (
-    <div style={{ padding: '10px 4px', minHeight: '680px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+    <div style={{ padding: '8px 2px 20px 2px', minHeight: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
       {/* SCREEN 1: SPLASH & WELCOME */}
       {screen === 'welcome' && (
         <div style={{ textAlign: 'center' }}>
