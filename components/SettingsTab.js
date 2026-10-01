@@ -58,29 +58,7 @@ export default function SettingsTab({
         </div>
       </div>
 
-      {profileSuccess && (
-        <div
-          style={{
-            background: 'rgba(16, 185, 129, 0.15)',
-            border: '1px solid rgba(16, 185, 129, 0.4)',
-            borderRadius: 'var(--radius-md)',
-            padding: '10px 14px',
-            marginBottom: '16px',
-            color: '#34d399',
-            fontSize: '13px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-          }}
-        >
-          <Icon name="check-circle" size={16} color="#10b981" />
-          <span>Profile preferences updated successfully!</span>
-        </div>
-      )}
-
-
-
-      {/* 2. MULTI-CURRENCY SELECTOR */}
+      {/* 1. MULTI-CURRENCY SELECTOR */}
       <div className="section-card" style={{ marginBottom: '14px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
           <Icon name="wallet" size={18} color="#10b981" />
