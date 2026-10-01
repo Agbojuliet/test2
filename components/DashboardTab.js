@@ -302,26 +302,13 @@ export default function DashboardTab({
               background: 'var(--bg-card)',
               border: '1px dashed var(--border-subtle)',
               borderRadius: 'var(--radius-md)',
-              padding: '24px 16px',
+              padding: '20px 16px',
               textAlign: 'center',
             }}
           >
-            <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '10px' }}>
-              No expenses recorded yet. Tap below to log your first transaction!
+            <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+              No expenses recorded yet this month.
             </div>
-            <button
-              type="button"
-              className="prompt-pill"
-              onClick={onOpenQuickAction}
-              style={{
-                margin: '0 auto',
-                color: 'var(--primary-light)',
-                borderColor: 'var(--primary)',
-                padding: '6px 14px',
-              }}
-            >
-              + Log First Expense
-            </button>
           </div>
         ) : (
           expenses.slice(0, 5).map((tx) => {

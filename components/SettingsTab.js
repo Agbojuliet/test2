@@ -316,24 +316,6 @@ export default function SettingsTab({
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={onRestartOnboarding}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              padding: '12px',
-              fontSize: '13px',
-              fontWeight: 600,
-            }}
-          >
-            <Icon name="sparkles" size={16} />
-            <span>Restart 3-Step Setup Assistant</span>
-          </button>
-
           {!showResetConfirm ? (
             <button
               type="button"

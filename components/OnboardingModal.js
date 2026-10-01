@@ -190,7 +190,7 @@ export default function OnboardingModal({ isOpen, onComplete, initialUser }) {
 
             <div className="form-group">
               <label className="form-label">Estimated Monthly Income</label>
-              <div className="amount-input-wrap">
+              <div className="amount-input-wrap" style={{ width: '100%' }}>
                 <span className="amount-symbol">{curr.symbol}</span>
                 <input
                   type="number"
@@ -201,19 +201,28 @@ export default function OnboardingModal({ isOpen, onComplete, initialUser }) {
                   onChange={(e) => setMonthlyIncome(e.target.value)}
                   autoFocus
                   required
+                  style={{ width: '100%', fontSize: '18px', paddingLeft: '34px', paddingRight: '10px' }}
                 />
               </div>
             </div>
 
-            {/* Quick Suggestions */}
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+            {/* Quick Suggestions - 2x2 Responsive Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '16px' }}>
               {['200000', '300000', '500000', '800000'].map((amt) => (
                 <button
                   key={amt}
                   type="button"
                   className="prompt-pill"
                   onClick={() => setMonthlyIncome(amt)}
-                  style={{ fontSize: '11px' }}
+                  style={{
+                    fontSize: '11px',
+                    padding: '8px',
+                    textAlign: 'center',
+                    justifyContent: 'center',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
                 >
                   {curr.symbol}{Number(amt).toLocaleString()}
                 </button>
@@ -222,7 +231,7 @@ export default function OnboardingModal({ isOpen, onComplete, initialUser }) {
 
             <div className="form-group">
               <label className="form-label">Income Frequency</label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
                 {[
                   { id: 'monthly', label: 'Monthly' },
                   { id: 'biweekly', label: 'Bi-Weekly' },
@@ -235,7 +244,8 @@ export default function OnboardingModal({ isOpen, onComplete, initialUser }) {
                     className={`prompt-pill ${incomeFrequency === item.id ? 'active' : ''}`}
                     style={{
                       textAlign: 'center',
-                      padding: '8px',
+                      padding: '8px 4px',
+                      fontSize: '11px',
                       background: incomeFrequency === item.id ? 'var(--primary)' : 'rgba(255, 255, 255, 0.05)',
                       color: incomeFrequency === item.id ? '#fff' : 'var(--text-secondary)',
                       borderColor: incomeFrequency === item.id ? 'var(--primary)' : 'var(--border-subtle)',
