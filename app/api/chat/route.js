@@ -54,45 +54,12 @@ export async function POST(request) {
       : 'None due';
 
     // Secret API Key from server environment or client settings
-    const rawApiKey = (process.env.AI_API_KEY || process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY || body.apiKey || '').trim();
+    const rawApiKey = (process.env.GROQ_API_KEY || process.env.AI_API_KEY || process.env.OPENAI_API_KEY || body.apiKey || '').trim();
 
-    // Intelligent Provider Detection based on Key Prefix & Config
-    let baseUrl = 'https://api.groq.com/openai/v1';
-    let model = 'llama-3.1-8b-instant';
-    let providerName = 'Groq (LLaMA 3.1)';
-
-    if (rawApiKey) {
-      if (rawApiKey.startsWith('gsk_')) {
-        // Groq API Key
-        baseUrl = process.env.AI_BASE_URL || 'https://api.groq.com/openai/v1';
-        model = process.env.AI_MODEL || 'llama-3.1-8b-instant';
-        providerName = 'Groq LLaMA-3.1';
-      } else if (rawApiKey.startsWith('sk-or-v1-')) {
-        // OpenRouter API Key
-        baseUrl = process.env.AI_BASE_URL || 'https://openrouter.ai/api/v1';
-        model = process.env.AI_MODEL || 'meta-llama/llama-3.1-8b-instruct:free';
-        providerName = 'OpenRouter AI';
-      } else if (rawApiKey.startsWith('sk-')) {
-        // OpenAI API Key
-        baseUrl = process.env.AI_BASE_URL && !process.env.AI_BASE_URL.includes('groq.com') 
-          ? process.env.AI_BASE_URL 
-          : 'https://api.openai.com/v1';
-        model = process.env.AI_MODEL && !process.env.AI_MODEL.includes('llama') 
-          ? process.env.AI_MODEL 
-          : 'gpt-4o-mini';
-        providerName = 'OpenAI GPT-4o-mini';
-      } else if (rawApiKey.startsWith('AIza')) {
-        // Google Gemini OpenAI-compatible
-        baseUrl = process.env.AI_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta/openai/';
-        model = process.env.AI_MODEL || 'gemini-1.5-flash';
-        providerName = 'Google Gemini';
-      } else {
-        // Custom provider
-        baseUrl = process.env.AI_BASE_URL || 'https://api.groq.com/openai/v1';
-        model = process.env.AI_MODEL || 'llama-3.1-8b-instant';
-        providerName = 'Custom LLM';
-      }
-    }
+    // Groq OpenAI-Compatible Provider Configuration
+    const baseUrl = process.env.AI_BASE_URL || 'https://api.groq.com/openai/v1';
+    const model = process.env.AI_MODEL || 'openai/gpt-oss-120b';
+    const providerName = 'Groq (openai/gpt-oss-120b)';
 
     // Dynamic System Prompt enforcing persona and mobile guidelines
     const systemPrompt = `You are an empathetic, practical, and sharp AI Budget Coach for FinSmart, a modern mobile-first personal finance app.
@@ -137,7 +104,7 @@ STRICT MOBILE CONSTRAINTS & BEHAVIOR:
       formattedMessages.push({ role: 'user', content: message });
     }
 
-    // Attempt live LLM completion if API key is provided
+    // Attempt live LLM completion with Groq API
     let llmErrorMessage = null;
     if (rawApiKey) {
       try {
@@ -154,8 +121,9 @@ STRICT MOBILE CONSTRAINTS & BEHAVIOR:
           body: JSON.stringify({
             model: model,
             messages: formattedMessages,
-            temperature: 0.6,
-            max_tokens: 350,
+            temperature: 1,
+            max_tokens: 1024,
+            top_p: 1,
           }),
         });
 
@@ -174,12 +142,12 @@ STRICT MOBILE CONSTRAINTS & BEHAVIOR:
           }
         } else {
           const errText = await response.text();
-          console.error(`LLM Provider API Error (${response.status}):`, errText);
-          llmErrorMessage = `LLM Provider Error (${response.status}): ${errText.slice(0, 120)}`;
+          console.error(`Groq API Error (${response.status}):`, errText);
+          llmErrorMessage = `Groq Error (${response.status}): ${errText.slice(0, 120)}`;
         }
       } catch (llmError) {
-        console.error('LLM Fetch Exception:', llmError);
-        llmErrorMessage = `LLM Network Error: ${llmError.message}`;
+        console.error('Groq Fetch Exception:', llmError);
+        llmErrorMessage = `Groq Network Error: ${llmError.message}`;
       }
     }
 
