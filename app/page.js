@@ -478,9 +478,7 @@ export default function Home() {
               onSendMessage={handleSendChatMessage}
               isSending={isAiSending}
               chatError={chatError}
-              aiProviderInfo={aiProviderInfo}
               onRetryLastMessage={() => handleSendChatMessage(lastUserMessage)}
-              onNavigateTab={setActiveTab}
               currencyCode={currencyCode}
               currencySymbol={currencySymbol}
             />

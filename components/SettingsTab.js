@@ -211,42 +211,6 @@ export default function SettingsTab({
           </div>
         </div>
 
-        {/* Live LLM API Key Configuration */}
-        <div style={{ marginBottom: '14px', paddingTop: '12px', borderTop: '1px solid var(--border-subtle)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-            <label className="form-label" style={{ margin: 0 }}>Live LLM API Key (Optional)</label>
-            <span style={{ fontSize: '10px', fontWeight: 600, color: user?.apiKey ? '#10b981' : 'var(--text-muted)' }}>
-              {user?.apiKey ? '✓ Active in App' : 'Checking .env.local'}
-            </span>
-          </div>
-          <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '8px', lineHeight: 1.4 }}>
-            Enter your free Groq (<code>gsk_...</code>) or OpenAI (<code>sk-...</code>) key to enable live LLM responses immediately without server restarts:
-          </p>
-          <div style={{ display: 'flex', gap: '6px' }}>
-            <input
-              type="password"
-              className="form-input"
-              placeholder="gsk_... or sk-..."
-              value={user?.apiKey || ''}
-              onChange={(e) => onUpdateUser({ apiKey: e.target.value.trim() })}
-              style={{ fontSize: '12px', padding: '8px 10px', fontFamily: 'monospace', flex: 1 }}
-            />
-            {user?.apiKey && (
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={() => onUpdateUser({ apiKey: '' })}
-                style={{ padding: '8px 12px', fontSize: '11px', color: '#f87171' }}
-              >
-                Clear
-              </button>
-            )}
-          </div>
-          <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '6px' }}>
-            Keys can also be placed in <code>.env.local</code> as <code>AI_API_KEY</code>.
-          </div>
-        </div>
-
         {/* Notification Toggles */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <div
