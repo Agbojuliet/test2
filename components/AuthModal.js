@@ -18,6 +18,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
     onLoginSuccess({
       email,
       name: name || (mode === 'signup' ? 'New Member' : 'Amaka Juliet'),
+      isNewUser: mode === 'signup',
     });
     onClose();
   };

@@ -126,6 +126,7 @@ export default function Home() {
       ...prev,
       name: name || prev.name,
       email: email || prev.email,
+      isNewUser: Boolean(isNewUser),
     }));
 
     if (isNewUser) {
