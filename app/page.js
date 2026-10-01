@@ -52,6 +52,8 @@ export default function Home() {
   const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
   const [chatMessages, setChatMessages] = useState(INITIAL_CHAT_MESSAGES);
   const [isAiSending, setIsAiSending] = useState(false);
+  const [chatError, setChatError] = useState(null);
+  const [lastUserMessage, setLastUserMessage] = useState('');
 
   // Modals & Drawers States
   const [quickActionOpen, setQuickActionOpen] = useState(false);
@@ -299,34 +301,68 @@ export default function Home() {
     setNotifications((prev) => prev.filter((n) => n.id !== notifId));
   };
 
-  // Conversational AI message handler (Connects to backend /api/ai/chat)
+  // Conversational AI message handler (Connects to backend /api/chat)
   const handleSendChatMessage = async (userText) => {
+    if (!userText || !userText.trim()) return;
+    const cleanText = userText.trim();
+    setLastUserMessage(cleanText);
+    setChatError(null);
+
     const userMsg = {
       id: `msg-${Date.now()}`,
       sender: 'user',
-      text: userText,
+      text: cleanText,
       time: 'Just now',
     };
-    setChatMessages((prev) => [...prev, userMsg]);
+    
+    // Retain full multi-turn conversation history
+    const updatedMessages = [...chatMessages, userMsg];
+    setChatMessages(updatedMessages);
     setIsAiSending(true);
 
+    // Compute live financial context
+    const totalIncome = incomes.reduce((s, i) => s + (Number(i.amount) || 0), 0);
+    const totalSpent = expenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
+    const totalBudget = Object.values(budgets).reduce((s, b) => s + (Number(b) || 0), 0);
+    const remainingBalance = totalIncome - totalSpent;
+
+    const catMap = {};
+    expenses.forEach((e) => {
+      catMap[e.category] = (catMap[e.category] || 0) + (Number(e.amount) || 0);
+    });
+    const topCategories = Object.entries(catMap)
+      .map(([category, amount]) => ({ category, amount }))
+      .sort((a, b) => b.amount - a.amount);
+
     try {
-      const res = await fetch('/api/ai/chat', {
+      const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: userText,
-          financialData: {
-            expenses,
-            incomes,
-            budgets,
-            savingsGoals,
+          message: cleanText,
+          messages: updatedMessages.map((m) => ({
+            role: m.sender === 'ai' || m.role === 'assistant' ? 'assistant' : 'user',
+            content: m.text || m.content || '',
+          })),
+          financialContext: {
+            totalBudget,
+            totalSpent,
+            totalIncome,
+            remainingBalance,
+            topCategories,
             upcomingBills,
-            user,
+            savingsGoals,
+            userName: user?.name,
+            financialGoal: user?.financialGoalLabel,
           },
           currencyCode,
+          currencySymbol,
         }),
       });
+
+      if (!res.ok) {
+        throw new Error(`Chat API error: ${res.status}`);
+      }
 
       const data = await res.json();
       const replyMsg = {
@@ -338,15 +374,11 @@ export default function Home() {
       setChatMessages((prev) => [...prev, replyMsg]);
     } catch (err) {
       console.error('Chat error:', err);
+      setChatError('Connection interrupted. You can tap Retry below.');
       const fallbackReply = {
         id: `msg-ai-${Date.now()}`,
         sender: 'ai',
-        text: `Based on your records, your highest spending category this month is Food, and your current balance is ${currencySymbol}${
-          (
-            incomes.reduce((s, i) => s + Number(i.amount), 0) -
-            expenses.reduce((s, e) => s + Number(e.amount), 0)
-          ).toLocaleString()
-        }.`,
+        text: `Based on your records, your current balance is ${currencySymbol}${remainingBalance.toLocaleString()} (Total spent: ${currencySymbol}${totalSpent.toLocaleString()}). Feel free to ask about any specific purchase or budget category!`,
         time: 'Just now',
       };
       setChatMessages((prev) => [...prev, fallbackReply]);
@@ -435,7 +467,10 @@ export default function Home() {
               chatMessages={chatMessages}
               onSendMessage={handleSendChatMessage}
               isSending={isAiSending}
+              chatError={chatError}
+              onRetryLastMessage={() => handleSendChatMessage(lastUserMessage)}
               currencyCode={currencyCode}
+              currencySymbol={currencySymbol}
             />
           )}
 

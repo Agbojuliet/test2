@@ -1,25 +1,36 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Icon from './Icons';
 
 export default function AICoachTab({
   aiInsights,
-  chatMessages,
+  chatMessages = [],
   onSendMessage,
   isSending,
+  chatError,
+  onRetryLastMessage,
   currencyCode = 'NGN',
+  currencySymbol = '₦',
 }) {
   const [activeSection, setActiveSection] = useState('insights'); // 'insights' | 'chat'
   const [inputText, setInputText] = useState('');
+  const messagesEndRef = useRef(null);
 
   const promptSuggestions = [
     'Where am I spending the most?',
-    'Can I afford to spend ₦20,000 today?',
+    `Can I afford to spend ${currencySymbol}20,000 today?`,
     'How can I reduce my expenses?',
     'Why am I always running out of money?',
-    'Give me tips to save ₦50,000 this month.',
+    `Give me tips to save ${currencySymbol}50,000 this month.`,
   ];
+
+  // Auto-scroll to latest message when new message arrives or loading state changes
+  useEffect(() => {
+    if (activeSection === 'chat') {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [chatMessages, isSending, activeSection]);
 
   const handleSend = (textToSend) => {
     const text = textToSend || inputText;
@@ -170,7 +181,7 @@ export default function AICoachTab({
         </div>
       )}
 
-      {/* SECTION 2: CONVERSATIONAL AI CHAT */}
+      {/* SECTION 2: CONVERSATIONAL AI CHAT (POWERED BY LIVE LLM) */}
       {activeSection === 'chat' && (
         <div className="chat-container">
           {/* Quick Prompts Carousel */}
@@ -189,26 +200,79 @@ export default function AICoachTab({
 
           {/* Messages Area */}
           <div className="chat-messages-area">
-            {chatMessages.map((msg) => (
-              <div key={msg.id} className={`chat-bubble ${msg.sender}`}>
-                <div style={{ whiteSpace: 'pre-line' }}>{msg.text}</div>
-                <div
-                  style={{
-                    fontSize: '10px',
-                    color: msg.sender === 'ai' ? 'var(--text-muted)' : 'rgba(255, 255, 255, 0.7)',
-                    marginTop: '4px',
-                    textAlign: msg.sender === 'user' ? 'right' : 'left',
-                  }}
-                >
-                  {msg.time}
+            {chatMessages.map((msg) => {
+              const isAi = msg.sender === 'ai' || msg.role === 'assistant';
+              return (
+                <div key={msg.id || `${msg.time}-${Math.random()}`} className={`chat-bubble ${isAi ? 'ai' : 'user'}`}>
+                  <div style={{ whiteSpace: 'pre-line' }}>{msg.text || msg.content}</div>
+                  <div
+                    style={{
+                      fontSize: '10px',
+                      color: isAi ? 'var(--text-muted)' : 'rgba(255, 255, 255, 0.75)',
+                      marginTop: '4px',
+                      textAlign: isAi ? 'left' : 'right',
+                    }}
+                  >
+                    {msg.time || 'Just now'}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
+
+            {/* Smooth Loading / Typing Indicator */}
             {isSending && (
-              <div className="chat-bubble ai" style={{ fontStyle: 'italic', color: '#a78bfa' }}>
-                Analyzing your financial ledger...
+              <div className="chat-bubble ai" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px' }}>
+                <span style={{ fontSize: '12px', color: '#c4b5fd', fontWeight: 500 }}>AI Coach is thinking</span>
+                <span className="typing-indicator">
+                  <span className="typing-dot" />
+                  <span className="typing-dot" />
+                  <span className="typing-dot" />
+                </span>
               </div>
             )}
+
+            {/* Graceful Network / Error State */}
+            {chatError && (
+              <div
+                style={{
+                  background: 'rgba(239, 68, 68, 0.12)',
+                  border: '1px solid rgba(239, 68, 68, 0.35)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '10px 12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '8px',
+                  fontSize: '12px',
+                  color: '#fca5a5',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Icon name="warning" size={14} color="#f87171" />
+                  <span>{chatError}</span>
+                </div>
+                {onRetryLastMessage && (
+                  <button
+                    type="button"
+                    onClick={onRetryLastMessage}
+                    style={{
+                      background: 'rgba(239, 68, 68, 0.25)',
+                      border: 'none',
+                      color: '#fff',
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Retry
+                  </button>
+                )}
+              </div>
+            )}
+
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Chat Input Bar */}
@@ -222,11 +286,17 @@ export default function AICoachTab({
             <input
               type="text"
               className="chat-input"
-              placeholder="Ask anything about your money..."
+              placeholder={`Ask about your ${currencyCode} budget, spending...`}
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
+              disabled={isSending}
             />
-            <button type="submit" className="chat-send-btn" disabled={!inputText.trim() || isSending}>
+            <button
+              type="submit"
+              className="chat-send-btn"
+              disabled={!inputText.trim() || isSending}
+              aria-label="Send message to AI Coach"
+            >
               <Icon name="send" size={16} />
             </button>
           </form>
