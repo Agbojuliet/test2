@@ -9,7 +9,9 @@ export default function AICoachTab({
   onSendMessage,
   isSending,
   chatError,
+  aiProviderInfo,
   onRetryLastMessage,
+  onNavigateTab,
   currencyCode = 'NGN',
   currencySymbol = '₦',
 }) {
@@ -25,7 +27,7 @@ export default function AICoachTab({
     `Give me tips to save ${currencySymbol}50,000 this month.`,
   ];
 
-  // Auto-scroll to latest message when new message arrives or loading state changes
+  // Auto-scroll to latest message
   useEffect(() => {
     if (activeSection === 'chat') {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -184,6 +186,56 @@ export default function AICoachTab({
       {/* SECTION 2: CONVERSATIONAL AI CHAT (POWERED BY LIVE LLM) */}
       {activeSection === 'chat' && (
         <div className="chat-container">
+          {/* Provider Status Pill */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '6px 10px',
+              background: 'rgba(139, 92, 246, 0.1)',
+              border: '1px solid rgba(139, 92, 246, 0.25)',
+              borderRadius: 'var(--radius-sm)',
+              fontSize: '11px',
+              color: '#c4b5fd',
+              marginBottom: '8px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span
+                style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  background: aiProviderInfo?.liveLLM ? '#10b981' : '#f59e0b',
+                }}
+              />
+              <span>
+                {aiProviderInfo?.provider
+                  ? `AI Engine: ${aiProviderInfo.provider}`
+                  : 'AI Engine: Live Context Assistant'}
+              </span>
+            </div>
+            {onNavigateTab && (
+              <button
+                type="button"
+                onClick={() => onNavigateTab('settings')}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--primary-light)',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                  padding: 0,
+                }}
+              >
+                Configure API Key
+              </button>
+            )}
+          </div>
+
           {/* Quick Prompts Carousel */}
           <div className="prompt-suggestions-row">
             {promptSuggestions.map((prompt) => (

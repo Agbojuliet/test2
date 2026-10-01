@@ -18,7 +18,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
-    // Extract consolidated financial metrics for grounding
+    // Extract consolidated financial metrics for live grounding
     const fin = {
       totalBudget: Number(financialContext.totalBudget ?? financialData.totalBudget ?? 0),
       totalSpent: Number(financialContext.totalSpent ?? financialData.totalSpent ?? 0),
@@ -34,7 +34,7 @@ export async function POST(request) {
     // Format top categories string for prompt
     const topCategoriesStr = Array.isArray(fin.topCategories) && fin.topCategories.length > 0
       ? fin.topCategories
-          .slice(0, 4)
+          .slice(0, 5)
           .map((c) => `${c.name || c.category}: ${currencySymbol}${Number(c.amount || c.spent || 0).toLocaleString()}`)
           .join(', ')
       : 'No major category expenses logged yet';
@@ -42,7 +42,7 @@ export async function POST(request) {
     // Format goals string
     const goalsStr = Array.isArray(fin.savingsGoals) && fin.savingsGoals.length > 0
       ? fin.savingsGoals
-          .map((g) => `${g.name}: ${currencySymbol}${Number(g.currentAmount || 0).toLocaleString()} / ${currencySymbol}${Number(g.targetAmount || 0).toLocaleString()}`)
+          .map((g) => `${g.name}: ${currencySymbol}${Number(g.currentAmount || 0).toLocaleString()} of ${currencySymbol}${Number(g.targetAmount || 0).toLocaleString()}`)
           .join('; ')
       : 'None set';
 
@@ -53,22 +53,48 @@ export async function POST(request) {
           .join('; ')
       : 'None due';
 
-    // Secret API Key from server environment
-    const apiKey = process.env.AI_API_KEY || process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY;
+    // Secret API Key from server environment or client settings
+    const rawApiKey = (process.env.AI_API_KEY || process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY || body.apiKey || '').trim();
 
-    // Detect endpoint provider (Groq default for high-speed free mobile inference, or OpenAI)
-    const isGroqKey = apiKey && (apiKey.startsWith('gsk_') || !process.env.AI_BASE_URL?.includes('openai.com'));
-    const isOpenAIKey = apiKey && apiKey.startsWith('sk-') && !apiKey.startsWith('gsk_');
+    // Intelligent Provider Detection based on Key Prefix & Config
+    let baseUrl = 'https://api.groq.com/openai/v1';
+    let model = 'llama-3.1-8b-instant';
+    let providerName = 'Groq (LLaMA 3.1)';
 
-    const baseUrl = process.env.AI_BASE_URL || (isOpenAIKey
-      ? 'https://api.openai.com/v1'
-      : 'https://api.groq.com/openai/v1');
+    if (rawApiKey) {
+      if (rawApiKey.startsWith('gsk_')) {
+        // Groq API Key
+        baseUrl = process.env.AI_BASE_URL || 'https://api.groq.com/openai/v1';
+        model = process.env.AI_MODEL || 'llama-3.1-8b-instant';
+        providerName = 'Groq LLaMA-3.1';
+      } else if (rawApiKey.startsWith('sk-or-v1-')) {
+        // OpenRouter API Key
+        baseUrl = process.env.AI_BASE_URL || 'https://openrouter.ai/api/v1';
+        model = process.env.AI_MODEL || 'meta-llama/llama-3.1-8b-instruct:free';
+        providerName = 'OpenRouter AI';
+      } else if (rawApiKey.startsWith('sk-')) {
+        // OpenAI API Key
+        baseUrl = process.env.AI_BASE_URL && !process.env.AI_BASE_URL.includes('groq.com') 
+          ? process.env.AI_BASE_URL 
+          : 'https://api.openai.com/v1';
+        model = process.env.AI_MODEL && !process.env.AI_MODEL.includes('llama') 
+          ? process.env.AI_MODEL 
+          : 'gpt-4o-mini';
+        providerName = 'OpenAI GPT-4o-mini';
+      } else if (rawApiKey.startsWith('AIza')) {
+        // Google Gemini OpenAI-compatible
+        baseUrl = process.env.AI_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta/openai/';
+        model = process.env.AI_MODEL || 'gemini-1.5-flash';
+        providerName = 'Google Gemini';
+      } else {
+        // Custom provider
+        baseUrl = process.env.AI_BASE_URL || 'https://api.groq.com/openai/v1';
+        model = process.env.AI_MODEL || 'llama-3.1-8b-instant';
+        providerName = 'Custom LLM';
+      }
+    }
 
-    const model = process.env.AI_MODEL || (baseUrl.includes('groq.com')
-      ? 'llama-3.1-8b-instant'
-      : 'gpt-4o-mini');
-
-    // Dynamic System Prompt enforcing the requested persona and mobile guidelines
+    // Dynamic System Prompt enforcing persona and mobile guidelines
     const systemPrompt = `You are an empathetic, practical, and sharp AI Budget Coach for FinSmart, a modern mobile-first personal finance app.
 The user's local currency is ${currencySymbol} (${currencyCode}).
 
@@ -90,12 +116,12 @@ STRICT MOBILE CONSTRAINTS & BEHAVIOR:
 4. Affordability Decisions: When asked about purchasing or spending a specific amount (e.g. "Can I afford ₦20,000?"), calculate against their remaining balance (${currencySymbol}${fin.remainingBalance.toLocaleString()}) and give a direct, realistic verdict with a practical next step.
 5. Never invent or hallucinate contradictory financial numbers.`;
 
-    // Construct conversation messages history for OpenAI/Groq compatible chat completions
+    // Construct conversation messages history
     const formattedMessages = [
       { role: 'system', content: systemPrompt },
     ];
 
-    // Append multi-turn history
+    // Append prior multi-turn conversation history
     if (Array.isArray(messages) && messages.length > 0) {
       messages.forEach((m) => {
         const role = (m.role === 'assistant' || m.sender === 'ai') ? 'assistant' : 'user';
@@ -112,7 +138,8 @@ STRICT MOBILE CONSTRAINTS & BEHAVIOR:
     }
 
     // Attempt live LLM completion if API key is provided
-    if (apiKey) {
+    let llmErrorMessage = null;
+    if (rawApiKey) {
       try {
         const endpoint = baseUrl.endsWith('/chat/completions')
           ? baseUrl
@@ -122,13 +149,13 @@ STRICT MOBILE CONSTRAINTS & BEHAVIOR:
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`,
+            'Authorization': `Bearer ${rawApiKey}`,
           },
           body: JSON.stringify({
             model: model,
             messages: formattedMessages,
             temperature: 0.6,
-            max_tokens: 300,
+            max_tokens: 350,
           }),
         });
 
@@ -139,21 +166,24 @@ STRICT MOBILE CONSTRAINTS & BEHAVIOR:
             return NextResponse.json({
               success: true,
               reply: replyText,
-              provider: isGroqKey ? 'Groq LLaMA-3.1' : (isOpenAIKey ? 'OpenAI GPT-4o-mini' : 'Live LLM API'),
+              provider: providerName,
               model: model,
+              liveLLM: true,
               timestamp: new Date().toISOString(),
             });
           }
         } else {
           const errText = await response.text();
           console.error(`LLM Provider API Error (${response.status}):`, errText);
+          llmErrorMessage = `LLM Provider Error (${response.status}): ${errText.slice(0, 120)}`;
         }
       } catch (llmError) {
         console.error('LLM Fetch Exception:', llmError);
+        llmErrorMessage = `LLM Network Error: ${llmError.message}`;
       }
     }
 
-    // Intelligent context-grounded fallback if AI_API_KEY is not configured or in case of network issue
+    // Intelligent context-grounded fallback if AI_API_KEY is not configured or upstream provider fails
     const lastUserQuery = (message || (formattedMessages[formattedMessages.length - 1]?.content || '')).toLowerCase();
     let reply = '';
 
@@ -176,7 +206,7 @@ STRICT MOBILE CONSTRAINTS & BEHAVIOR:
         reply = `You haven't logged any major expenses yet this month! With a starting income of ${currencySymbol}${fin.totalIncome.toLocaleString()}, you have full control to allocate your funds deliberately.`;
       }
     } else if (lastUserQuery.includes('reduce') || lastUserQuery.includes('save') || lastUserQuery.includes('tip')) {
-      reply = `To accelerate your goal of "${fin.financialGoal}", try trimming 10% from discretionary areas like ${fin.topCategories?.[0]?.name || 'Shopping/Dining'}. That alone could preserve an extra ${currencySymbol}${Math.round((fin.totalSpent || 50000) * 0.1).toLocaleString()} this month!`;
+      reply = `To accelerate your goal of "${fin.financialGoal}", try trimming 10% from discretionary areas like ${fin.topCategories?.[0]?.name || 'Shopping & Dining'}. That alone could preserve an extra ${currencySymbol}${Math.round((fin.totalSpent || 50000) * 0.1).toLocaleString()} this month!`;
     } else if (lastUserQuery.includes('balance') || lastUserQuery.includes('how much') || lastUserQuery.includes('left')) {
       reply = `You have ${currencySymbol}${fin.remainingBalance.toLocaleString()} remaining out of your ${currencySymbol}${fin.totalIncome.toLocaleString()} monthly income, having spent ${currencySymbol}${fin.totalSpent.toLocaleString()} across your budget so far.`;
     } else {
@@ -186,7 +216,9 @@ STRICT MOBILE CONSTRAINTS & BEHAVIOR:
     return NextResponse.json({
       success: true,
       reply,
-      provider: 'Context-Aware Financial Engine (Add AI_API_KEY to enable live LLM)',
+      provider: rawApiKey ? `Fallback (Provider issue: ${llmErrorMessage})` : 'Context-Aware Engine (Add AI_API_KEY for live LLM)',
+      liveLLM: false,
+      warning: llmErrorMessage || (!rawApiKey ? 'No AI_API_KEY detected in .env.local' : null),
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

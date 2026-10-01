@@ -54,6 +54,7 @@ export default function Home() {
   const [isAiSending, setIsAiSending] = useState(false);
   const [chatError, setChatError] = useState(null);
   const [lastUserMessage, setLastUserMessage] = useState('');
+  const [aiProviderInfo, setAiProviderInfo] = useState(null);
 
   // Modals & Drawers States
   const [quickActionOpen, setQuickActionOpen] = useState(false);
@@ -357,6 +358,7 @@ export default function Home() {
           },
           currencyCode,
           currencySymbol,
+          apiKey: user?.apiKey || '',
         }),
       });
 
@@ -365,6 +367,14 @@ export default function Home() {
       }
 
       const data = await res.json();
+      if (data.provider) {
+        setAiProviderInfo({
+          provider: data.provider,
+          liveLLM: data.liveLLM,
+          warning: data.warning,
+        });
+      }
+
       const replyMsg = {
         id: `msg-ai-${Date.now()}`,
         sender: 'ai',
@@ -468,7 +478,9 @@ export default function Home() {
               onSendMessage={handleSendChatMessage}
               isSending={isAiSending}
               chatError={chatError}
+              aiProviderInfo={aiProviderInfo}
               onRetryLastMessage={() => handleSendChatMessage(lastUserMessage)}
+              onNavigateTab={setActiveTab}
               currencyCode={currencyCode}
               currencySymbol={currencySymbol}
             />
