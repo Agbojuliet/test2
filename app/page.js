@@ -316,7 +316,14 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: userText,
-          financialData: { expenses, incomes, budgets },
+          financialData: {
+            expenses,
+            incomes,
+            budgets,
+            savingsGoals,
+            upcomingBills,
+            user,
+          },
           currencyCode,
         }),
       });

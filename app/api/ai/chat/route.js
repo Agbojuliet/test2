@@ -17,6 +17,9 @@ export async function POST(request) {
       expenses: financialData?.expenses || [],
       incomes: financialData?.incomes || [],
       budgets: financialData?.budgets || {},
+      savingsGoals: financialData?.savingsGoals || [],
+      upcomingBills: financialData?.upcomingBills || [],
+      user: financialData?.user || {},
       currencyCode,
     });
 

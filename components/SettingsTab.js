@@ -12,31 +12,11 @@ export default function SettingsTab({
   onLogout,
   onNavigateTab,
 }) {
-  const [name, setName] = useState(user?.name || '');
-  const [email, setEmail] = useState(user?.email || '');
-  const [monthlyIncome, setMonthlyIncome] = useState(user?.monthlyIncome || 300000);
-  const [incomeFrequency, setIncomeFrequency] = useState(user?.incomeFrequency || 'monthly');
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [profileSuccess, setProfileSuccess] = useState(false);
   const [aiTone, setAiTone] = useState('encouraging'); // 'encouraging' | 'analytical' | 'strict'
   const [alertsEnabled, setAlertsEnabled] = useState(true);
   const [digestEnabled, setDigestEnabled] = useState(true);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-
-  const handleSaveProfile = (e) => {
-    e.preventDefault();
-    if (!name.trim()) return;
-    onUpdateUser({
-      name: name.trim(),
-      email: email.trim() || user?.email,
-      monthlyIncome: Number(monthlyIncome) || user?.monthlyIncome || 300000,
-      incomeFrequency,
-    });
-    setIsEditingProfile(false);
-    setProfileSuccess(true);
-    setTimeout(() => setProfileSuccess(false), 3000);
-  };
 
   const handleSelectGoal = (goalKey, goalLabel) => {
     onUpdateUser({
@@ -98,125 +78,7 @@ export default function SettingsTab({
         </div>
       )}
 
-      {/* 1. PROFILE CARD */}
-      <div className="section-card" style={{ marginBottom: '14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div
-              className="user-avatar"
-              style={{
-                width: '52px',
-                height: '52px',
-                fontSize: '20px',
-                boxShadow: '0 4px 14px rgba(16, 185, 129, 0.4)',
-              }}
-            >
-              {user?.name?.[0] || 'A'}
-            </div>
-            <div>
-              <div style={{ fontSize: '16px', fontWeight: 800, color: '#fff' }}>
-                {user?.name || 'Amaka Juliet'}
-              </div>
-              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                {user?.email || 'amaka.juliet@example.com'}
-              </div>
-              <div
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  marginTop: '4px',
-                  background: 'rgba(16, 185, 129, 0.12)',
-                  color: 'var(--primary-light)',
-                  padding: '2px 8px',
-                  borderRadius: 'var(--radius-full)',
-                  fontSize: '11px',
-                  fontWeight: 600,
-                }}
-              >
-                <Icon name="target" size={12} color="#10b981" />
-                <span>{user?.financialGoalLabel || 'Emergency Fund'}</span>
-              </div>
-            </div>
-          </div>
 
-          <button
-            type="button"
-            className="icon-btn"
-            onClick={() => setIsEditingProfile(!isEditingProfile)}
-            aria-label="Edit Profile"
-            style={{ width: '34px', height: '34px' }}
-          >
-            <Icon name="user" size={16} />
-          </button>
-        </div>
-
-        {/* Edit Profile Expandable Form */}
-        {isEditingProfile && (
-          <form
-            onSubmit={handleSaveProfile}
-            style={{
-              marginTop: '14px',
-              paddingTop: '14px',
-              borderTop: '1px solid var(--border-subtle)',
-            }}
-          >
-            <div className="form-group">
-              <label className="form-label">Full Name</label>
-              <input
-                type="text"
-                className="form-input"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Email Address</label>
-              <input
-                type="email"
-                className="form-input"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Monthly Income ({currentCurrency})</label>
-              <input
-                type="number"
-                className="form-input"
-                value={monthlyIncome}
-                onChange={(e) => setMonthlyIncome(e.target.value)}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Income Frequency</label>
-              <select
-                className="form-input"
-                value={incomeFrequency}
-                onChange={(e) => setIncomeFrequency(e.target.value)}
-              >
-                <option value="monthly">Monthly</option>
-                <option value="biweekly">Bi-weekly (Every 2 weeks)</option>
-                <option value="weekly">Weekly</option>
-              </select>
-            </div>
-            <div style={{ display: 'flex', gap: '8px', marginTop: '14px' }}>
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={() => setIsEditingProfile(false)}
-                style={{ flex: 1, padding: '10px' }}
-              >
-                Cancel
-              </button>
-              <button type="submit" className="btn-primary" style={{ flex: 1, padding: '10px' }}>
-                Save Changes
-              </button>
-            </div>
-          </form>
-        )}
-      </div>
 
       {/* 2. MULTI-CURRENCY SELECTOR */}
       <div className="section-card" style={{ marginBottom: '14px' }}>
