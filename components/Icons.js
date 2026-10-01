@@ -248,6 +248,36 @@ export default function Icon({ name, size = 20, className = '', color = 'current
           <line x1="12" y1="18" x2="12.01" y2="18" />
         </svg>
       );
+    case 'chevron-left':
+    case 'arrow-left':
+      return (
+        <svg {...props}>
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+      );
+    case 'trash':
+    case 'delete':
+      return (
+        <svg {...props}>
+          <polyline points="3 6 5 6 21 6" />
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+        </svg>
+      );
+    case 'shield':
+      return (
+        <svg {...props}>
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        </svg>
+      );
+    case 'logout':
+    case 'log-out':
+      return (
+        <svg {...props}>
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
+        </svg>
+      );
     default:
       return (
         <svg {...props}>

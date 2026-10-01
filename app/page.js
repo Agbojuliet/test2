@@ -7,6 +7,7 @@ import DashboardTab from '@/components/DashboardTab';
 import TransactionsTab from '@/components/TransactionsTab';
 import AnalyticsTab from '@/components/AnalyticsTab';
 import AICoachTab from '@/components/AICoachTab';
+import SettingsTab from '@/components/SettingsTab';
 
 // Auth and Onboarding Views
 import AuthView from '@/components/AuthView';
@@ -19,7 +20,6 @@ import AddIncomeModal from '@/components/AddIncomeModal';
 import SetBudgetModal from '@/components/SetBudgetModal';
 import AddGoalModal from '@/components/AddGoalModal';
 import NotificationsDrawer from '@/components/NotificationsDrawer';
-import SettingsModal from '@/components/SettingsModal';
 
 // Seed and AI logic
 import {
@@ -60,7 +60,6 @@ export default function Home() {
   const [setBudgetOpen, setSetBudgetOpen] = useState(false);
   const [addGoalOpen, setAddGoalOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [onboardingOpen, setOnboardingOpen] = useState(false);
 
   // Load persisted state on client mount
@@ -371,7 +370,7 @@ export default function Home() {
       user={user}
       unreadNotifsCount={unreadNotifsCount}
       onOpenNotifications={() => setNotificationsOpen(true)}
-      onOpenSettings={() => setSettingsOpen(true)}
+      onOpenSettings={() => setActiveTab('settings')}
       isAuthenticated={isAuthenticated}
       bottomNav={
         isAuthenticated && (
@@ -388,7 +387,7 @@ export default function Home() {
         <AuthView onAuthSuccess={handleAuthSuccess} />
       ) : (
         <>
-          {/* 2. MAIN APPLICATION (4 Primary Tabs) */}
+          {/* 2. MAIN APPLICATION (Primary Tabs & Dedicated Settings Page) */}
           {activeTab === 'dashboard' && (
             <DashboardTab
               user={user}
@@ -430,6 +429,17 @@ export default function Home() {
               onSendMessage={handleSendChatMessage}
               isSending={isAiSending}
               currencyCode={currencyCode}
+            />
+          )}
+
+          {activeTab === 'settings' && (
+            <SettingsTab
+              user={user}
+              onUpdateUser={(updates) => setUser((prev) => ({ ...prev, ...updates }))}
+              onRestartOnboarding={() => setOnboardingOpen(true)}
+              onResetData={handleResetData}
+              onLogout={handleLogout}
+              onNavigateTab={setActiveTab}
             />
           )}
         </>
@@ -477,16 +487,6 @@ export default function Home() {
         onClose={() => setNotificationsOpen(false)}
         notifications={notifications}
         onClearNotification={handleClearNotification}
-      />
-
-      <SettingsModal
-        isOpen={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
-        user={user}
-        onUpdateUser={(updates) => setUser((prev) => ({ ...prev, ...updates }))}
-        onRestartOnboarding={() => setOnboardingOpen(true)}
-        onResetData={handleResetData}
-        onLogout={handleLogout}
       />
 
       {/* 3-Step Onboarding Modal (Currency -> Income -> Goal) */}

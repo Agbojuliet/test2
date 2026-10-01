@@ -46,9 +46,10 @@ export default function MobileFrame({
 
                 <button
                   type="button"
-                  className="icon-btn"
+                  className={`icon-btn ${activeTab === 'settings' ? 'active' : ''}`}
                   onClick={onOpenSettings}
                   aria-label="Settings"
+                  style={activeTab === 'settings' ? { borderColor: 'var(--primary)', color: 'var(--primary-light)', background: 'rgba(16, 185, 129, 0.15)' } : {}}
                 >
                   <Icon name="settings" size={18} />
                 </button>
