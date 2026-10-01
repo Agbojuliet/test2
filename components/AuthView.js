@@ -38,13 +38,6 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
     });
   };
 
-  const handleUseDemo = () => {
-    onAuthSuccess({
-      name: 'Amaka Juliet',
-      email: 'amaka.juliet@example.com',
-      isNewUser: false,
-    });
-  };
 
   return (
     <div style={{ padding: '10px 4px', minHeight: '680px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
@@ -206,22 +199,6 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
             >
               <Icon name="log-in" size={18} />
               <span>Log In</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleUseDemo}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'var(--text-muted)',
-                fontSize: '12px',
-                cursor: 'pointer',
-                marginTop: '6px',
-                textDecoration: 'underline',
-              }}
-            >
-              Or explore with Demo Profile (Amaka Juliet)
             </button>
           </div>
         </div>
@@ -403,33 +380,6 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
               <span>Sign In to Dashboard</span>
             </button>
           </form>
-
-          {/* Quick Demo Credentials Autofill */}
-          <div
-            style={{
-              marginTop: '16px',
-              background: 'rgba(255, 255, 255, 0.04)',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: 'var(--radius-md)',
-              padding: '12px',
-              textAlign: 'center',
-            }}
-          >
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '6px' }}>
-              Quick Test:
-            </div>
-            <button
-              type="button"
-              className="prompt-pill"
-              onClick={() => {
-                setEmail('amaka.juliet@example.com');
-                setPassword('password123');
-              }}
-              style={{ fontSize: '11px' }}
-            >
-              Autofill Demo Credentials
-            </button>
-          </div>
 
           <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '13px', color: 'var(--text-secondary)' }}>
             Don&apos;t have an account yet?{' '}

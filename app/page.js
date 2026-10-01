@@ -373,6 +373,15 @@ export default function Home() {
       onOpenNotifications={() => setNotificationsOpen(true)}
       onOpenSettings={() => setSettingsOpen(true)}
       isAuthenticated={isAuthenticated}
+      bottomNav={
+        isAuthenticated && (
+          <BottomNav
+            activeTab={activeTab}
+            onSelectTab={setActiveTab}
+            onOpenQuickAction={() => setQuickActionOpen(true)}
+          />
+        )
+      }
     >
       {/* 1. AUTH VIEW (Welcome Splash, Sign Up, Login) */}
       {!isAuthenticated ? (
@@ -423,13 +432,6 @@ export default function Home() {
               currencyCode={currencyCode}
             />
           )}
-
-          {/* Persistent Mobile Bottom Navigation */}
-          <BottomNav
-            activeTab={activeTab}
-            onSelectTab={setActiveTab}
-            onOpenQuickAction={() => setQuickActionOpen(true)}
-          />
         </>
       )}
 
