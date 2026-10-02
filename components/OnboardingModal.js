@@ -1,17 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Icon from './Icons';
 import { CURRENCIES, formatCurrency } from '@/lib/currency';
 
 export default function OnboardingModal({ isOpen, onComplete, initialUser }) {
   const [step, setStep] = useState(1);
   const [currency, setCurrency] = useState(initialUser?.preferredCurrency || 'NGN');
-  const [monthlyIncome, setMonthlyIncome] = useState(
-    initialUser?.monthlyIncome && !initialUser?.isNewUser ? String(initialUser.monthlyIncome) : ''
-  );
+  const [monthlyIncome, setMonthlyIncome] = useState('0');
   const [incomeFrequency, setIncomeFrequency] = useState('monthly');
   const [goal, setGoal] = useState('emergency_fund');
+
+  useEffect(() => {
+    if (isOpen) {
+      setStep(1);
+      setMonthlyIncome('0');
+      setCurrency(initialUser?.preferredCurrency || 'NGN');
+    }
+  }, [isOpen, initialUser]);
 
   if (!isOpen) return null;
 
