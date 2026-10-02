@@ -5,10 +5,10 @@ import Icon from './Icons';
 import { calculateSavingsPace } from '@/lib/ai-engine';
 
 export default function AddGoalModal({ isOpen, onClose, onAddGoal, currencySymbol = '₦' }) {
-  const [name, setName] = useState('New Laptop');
-  const [targetAmount, setTargetAmount] = useState('500000');
-  const [currentAmount, setCurrentAmount] = useState('150000');
-  const [targetDate, setTargetDate] = useState('2026-12-31');
+  const [name, setName] = useState('');
+  const [targetAmount, setTargetAmount] = useState('');
+  const [currentAmount, setCurrentAmount] = useState('0');
+  const [targetDate, setTargetDate] = useState(() => new Date().toISOString().split('T')[0]);
 
   if (!isOpen) return null;
 
@@ -54,7 +54,7 @@ export default function AddGoalModal({ isOpen, onClose, onAddGoal, currencySymbo
             <input
               type="text"
               className="form-input"
-              placeholder="e.g. New Laptop, Emergency Fund"
+              placeholder="e.g. Emergency Fund, New Laptop"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -70,7 +70,7 @@ export default function AddGoalModal({ isOpen, onClose, onAddGoal, currencySymbo
                   type="number"
                   className="form-input amount-input"
                   style={{ fontSize: '18px', paddingLeft: '30px' }}
-                  placeholder="500,000"
+                  placeholder="0"
                   value={targetAmount}
                   onChange={(e) => setTargetAmount(e.target.value)}
                   required
@@ -86,7 +86,7 @@ export default function AddGoalModal({ isOpen, onClose, onAddGoal, currencySymbo
                   type="number"
                   className="form-input amount-input"
                   style={{ fontSize: '18px', paddingLeft: '30px' }}
-                  placeholder="150,000"
+                  placeholder="0"
                   value={currentAmount}
                   onChange={(e) => setCurrentAmount(e.target.value)}
                 />

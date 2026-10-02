@@ -5,9 +5,9 @@ import Icon from './Icons';
 import { INCOME_SOURCES } from '@/lib/currency';
 
 export default function AddIncomeModal({ isOpen, onClose, onAddIncome, currencySymbol = '₦' }) {
-  const [amount, setAmount] = useState('300000');
+  const [amount, setAmount] = useState('');
   const [source, setSource] = useState('Salary');
-  const [description, setDescription] = useState('Monthly Salary');
+  const [description, setDescription] = useState('');
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
 
   if (!isOpen) return null;
@@ -56,7 +56,7 @@ export default function AddIncomeModal({ isOpen, onClose, onAddIncome, currencyS
                 type="number"
                 inputMode="decimal"
                 className="form-input amount-input"
-                placeholder="300,000"
+                placeholder="0"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 autoFocus

@@ -398,17 +398,62 @@ export default function Home() {
   };
 
   const handleResetData = () => {
-    setUser(INITIAL_USER);
-    setExpenses(INITIAL_EXPENSES);
-    setIncomes(INITIAL_INCOMES);
-    setBudgets(INITIAL_BUDGETS);
-    setUpcomingBills(INITIAL_UPCOMING_BILLS);
-    setSavingsGoals(INITIAL_SAVINGS_GOALS);
-    setNotifications(INITIAL_NOTIFICATIONS);
-    setChatMessages(INITIAL_CHAT_MESSAGES);
+    // Reset all logged data for the current user's profile
+    setExpenses([]);
+    setIncomes([]);
+    setUpcomingBills([]);
+    setSavingsGoals([]);
+    setBudgets({
+      Food: 0,
+      Transportation: 0,
+      Bills: 0,
+      Health: 0,
+      Shopping: 0,
+      Entertainment: 0,
+      Education: 0,
+      Other: 0,
+    });
+    setNotifications([
+      {
+        id: `notif-${Date.now()}`,
+        type: 'spending_reminder',
+        title: 'Account Data Reset',
+        message: 'All your logged expenses, incomes, budgets, and savings goals have been reset.',
+        time: 'Just now',
+        read: false,
+        badge: 'info',
+      },
+    ]);
+    const currentMonth = new Date().toLocaleString('en-US', { month: 'long' });
+    setChatMessages([
+      {
+        id: `msg-${Date.now()}`,
+        sender: 'ai',
+        text: `Hello ${user?.name || 'there'}! Your profile records have been reset clean. I'm ready to track and analyze your ${currentMonth} finances as you log new transactions!`,
+        time: 'Just now',
+      },
+    ]);
     try {
-      localStorage.clear();
-    } catch (e) {}
+      localStorage.setItem('finsmart_expenses', JSON.stringify([]));
+      localStorage.setItem('finsmart_incomes', JSON.stringify([]));
+      localStorage.setItem('finsmart_goals', JSON.stringify([]));
+      localStorage.setItem('finsmart_bills', JSON.stringify([]));
+      localStorage.setItem(
+        'finsmart_budgets',
+        JSON.stringify({
+          Food: 0,
+          Transportation: 0,
+          Bills: 0,
+          Health: 0,
+          Shopping: 0,
+          Entertainment: 0,
+          Education: 0,
+          Other: 0,
+        })
+      );
+    } catch (e) {
+      console.error('Error saving reset state:', e);
+    }
   };
 
   const unreadNotifsCount = notifications.filter((n) => !n.read).length;

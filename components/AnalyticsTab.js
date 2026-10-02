@@ -40,7 +40,13 @@ export default function AnalyticsTab({ expenses, incomes, currencyCode = 'NGN' }
     color: '#f59e0b',
   };
 
-  // Month-over-month simulation (September vs August)
+  // Dynamic Month calculations (Current Month vs Previous Month)
+  const now = new Date();
+  const currentMonthName = now.toLocaleString('en-US', { month: 'long' });
+  const prevDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const prevMonthShort = prevDate.toLocaleString('en-US', { month: 'short' });
+
+  // Month-over-month comparison simulation
   const previousMonthSpend = Math.round(totalSpent * 0.89);
   const diffPct = previousMonthSpend > 0 ? Math.round(((totalSpent - previousMonthSpend) / previousMonthSpend) * 100) : 0;
 
@@ -55,7 +61,7 @@ export default function AnalyticsTab({ expenses, incomes, currencyCode = 'NGN' }
         </div>
       </div>
 
-      {/* September Spending Hero Card */}
+      {/* Current Month Spending Hero Card */}
       <div
         className="glass-card"
         style={{
@@ -67,7 +73,7 @@ export default function AnalyticsTab({ expenses, incomes, currencyCode = 'NGN' }
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
             <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-              September Total Spending
+              {currentMonthName} Total Spending
             </div>
             <div style={{ fontSize: '28px', fontWeight: 800, color: '#fff', marginTop: '4px' }}>
               {formatCurrency(totalSpent, currencyCode)}
@@ -88,7 +94,7 @@ export default function AnalyticsTab({ expenses, incomes, currencyCode = 'NGN' }
             }}
           >
             <Icon name={diffPct > 0 ? 'arrow-up-right' : 'arrow-down-left'} size={14} />
-            <span>{diffPct > 0 ? `+${diffPct}%` : `${diffPct}%`} vs Aug</span>
+            <span>{diffPct > 0 ? `+${diffPct}%` : `${diffPct}%`} vs {prevMonthShort}</span>
           </div>
         </div>
 

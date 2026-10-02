@@ -5,9 +5,9 @@ import Icon from './Icons';
 import { CATEGORIES } from '@/lib/currency';
 
 export default function AddExpenseModal({ isOpen, onClose, onAddExpense, currencySymbol = '₦' }) {
-  const [amount, setAmount] = useState('5000');
+  const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('Food');
-  const [description, setDescription] = useState('Lunch');
+  const [description, setDescription] = useState('');
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
 
   if (!isOpen) return null;
@@ -58,7 +58,7 @@ export default function AddExpenseModal({ isOpen, onClose, onAddExpense, currenc
                 type="number"
                 inputMode="decimal"
                 className="form-input amount-input"
-                placeholder="5,000"
+                placeholder="0"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 autoFocus
@@ -113,7 +113,7 @@ export default function AddExpenseModal({ isOpen, onClose, onAddExpense, currenc
             <input
               type="text"
               className="form-input"
-              placeholder="e.g. Lunch"
+              placeholder="e.g. Lunch, Groceries, Transport"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
