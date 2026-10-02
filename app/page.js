@@ -17,6 +17,7 @@ import OnboardingModal from '@/components/OnboardingModal';
 import QuickActionSheet from '@/components/QuickActionSheet';
 import AddExpenseModal from '@/components/AddExpenseModal';
 import AddIncomeModal from '@/components/AddIncomeModal';
+import AddBillModal from '@/components/AddBillModal';
 import SetBudgetModal from '@/components/SetBudgetModal';
 import AddGoalModal from '@/components/AddGoalModal';
 import NotificationsDrawer from '@/components/NotificationsDrawer';
@@ -60,6 +61,7 @@ export default function Home() {
   const [quickActionOpen, setQuickActionOpen] = useState(false);
   const [addExpenseOpen, setAddExpenseOpen] = useState(false);
   const [addIncomeOpen, setAddIncomeOpen] = useState(false);
+  const [addBillOpen, setAddBillOpen] = useState(false);
   const [setBudgetOpen, setSetBudgetOpen] = useState(false);
   const [addGoalOpen, setAddGoalOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -243,6 +245,7 @@ export default function Home() {
   const handleQuickAction = (actionId) => {
     if (actionId === 'add-expense') setAddExpenseOpen(true);
     if (actionId === 'add-income') setAddIncomeOpen(true);
+    if (actionId === 'add-bill') setAddBillOpen(true);
     if (actionId === 'set-budget') setSetBudgetOpen(true);
     if (actionId === 'add-goal') setAddGoalOpen(true);
   };
@@ -290,6 +293,10 @@ export default function Home() {
 
   const handleAddGoal = (newGoal) => {
     setSavingsGoals((prev) => [newGoal, ...prev]);
+  };
+
+  const handleAddBill = (newBill) => {
+    setUpcomingBills((prev) => [newBill, ...prev]);
   };
 
   const handleMarkBillPaid = (billId) => {
@@ -497,6 +504,7 @@ export default function Home() {
               aiInsights={aiInsights}
               onNavigateTab={setActiveTab}
               onOpenQuickAction={() => setQuickActionOpen(true)}
+              onOpenAddBill={() => setAddBillOpen(true)}
               onMarkBillPaid={handleMarkBillPaid}
             />
           )}
@@ -564,6 +572,13 @@ export default function Home() {
         isOpen={addIncomeOpen}
         onClose={() => setAddIncomeOpen(false)}
         onAddIncome={handleAddIncome}
+        currencySymbol={currencySymbol}
+      />
+
+      <AddBillModal
+        isOpen={addBillOpen}
+        onClose={() => setAddBillOpen(false)}
+        onAddBill={handleAddBill}
         currencySymbol={currencySymbol}
       />
 

@@ -13,6 +13,7 @@ export default function DashboardTab({
   aiInsights,
   onNavigateTab,
   onOpenQuickAction,
+  onOpenAddBill,
   onMarkBillPaid,
 }) {
   const currencyCode = user?.preferredCurrency || 'NGN';
@@ -187,22 +188,38 @@ export default function DashboardTab({
           <Icon name="bills" size={16} color="#ef4444" />
           Upcoming Bills
         </h4>
+        <button
+          type="button"
+          className="section-link"
+          onClick={() => (onOpenAddBill ? onOpenAddBill() : onOpenQuickAction())}
+          style={{ fontSize: '12px', color: '#f43f5e', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}
+        >
+          <Icon name="plus" size={12} color="#f43f5e" />
+          <span>Add Bill</span>
+        </button>
       </div>
 
       <div className="bills-list">
         {upcomingBills.length === 0 ? (
           <div
+            onClick={() => (onOpenAddBill ? onOpenAddBill() : onOpenQuickAction())}
             style={{
               background: 'var(--bg-card)',
-              border: '1px solid var(--border-subtle)',
+              border: '1px dashed rgba(244, 63, 94, 0.3)',
               borderRadius: 'var(--radius-md)',
-              padding: '14px 16px',
+              padding: '16px',
               textAlign: 'center',
+              cursor: 'pointer',
               color: 'var(--text-muted)',
               fontSize: '13px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '6px',
             }}
           >
-            No upcoming bills yet. Add recurring bills with the &apos;+&apos; button anytime.
+            <Icon name="bills" size={20} color="#f43f5e" />
+            <span>No upcoming bills yet. Tap here or use &apos;+&apos; to add a recurring bill.</span>
           </div>
         ) : (
           upcomingBills.map((bill) => (

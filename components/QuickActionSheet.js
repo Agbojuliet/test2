@@ -54,6 +54,22 @@ export default function QuickActionSheet({ isOpen, onClose, onSelectAction }) {
             className="quick-action-card"
             onClick={() => {
               onClose();
+              onSelectAction('add-bill');
+            }}
+          >
+            <div className="quick-action-icon" style={{ background: 'linear-gradient(135deg, #f43f5e, #be123c)' }}>
+              <Icon name="bills" size={22} color="#fff" />
+            </div>
+            <div>
+              <div className="quick-action-label">Recurring Bill</div>
+              <div className="quick-action-sub">Track upcoming bills & rent</div>
+            </div>
+          </div>
+
+          <div
+            className="quick-action-card"
+            onClick={() => {
+              onClose();
               onSelectAction('set-budget');
             }}
           >

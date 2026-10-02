@@ -7,7 +7,9 @@ import { CURRENCIES, formatCurrency } from '@/lib/currency';
 export default function OnboardingModal({ isOpen, onComplete, initialUser }) {
   const [step, setStep] = useState(1);
   const [currency, setCurrency] = useState(initialUser?.preferredCurrency || 'NGN');
-  const [monthlyIncome, setMonthlyIncome] = useState(initialUser?.monthlyIncome ? String(initialUser.monthlyIncome) : '300000');
+  const [monthlyIncome, setMonthlyIncome] = useState(
+    initialUser?.monthlyIncome && !initialUser?.isNewUser ? String(initialUser.monthlyIncome) : ''
+  );
   const [incomeFrequency, setIncomeFrequency] = useState('monthly');
   const [goal, setGoal] = useState('emergency_fund');
 
@@ -53,7 +55,7 @@ export default function OnboardingModal({ isOpen, onComplete, initialUser }) {
       const selectedGoalObj = financialGoals.find((g) => g.id === goal);
       onComplete({
         preferredCurrency: currency,
-        monthlyIncome: parseFloat(monthlyIncome) || 300000,
+        monthlyIncome: parseFloat(monthlyIncome) || 0,
         incomeFrequency,
         financialGoal: goal,
         financialGoalLabel: selectedGoalObj ? selectedGoalObj.title : 'Build an Emergency Fund',
@@ -196,7 +198,7 @@ export default function OnboardingModal({ isOpen, onComplete, initialUser }) {
                   type="number"
                   inputMode="decimal"
                   className="form-input amount-input"
-                  placeholder="300,000"
+                  placeholder="0"
                   value={monthlyIncome}
                   onChange={(e) => setMonthlyIncome(e.target.value)}
                   autoFocus
