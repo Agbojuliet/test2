@@ -398,27 +398,43 @@ export default function Home() {
   };
 
   const handleResetData = () => {
-    // Reset all logged data for the current user's profile
+    // Retain user's configured monthly income so Available Balance is preserved
+    const monthlyIncome = Number(user?.monthlyIncome) || 300000;
+    const baseIncomes = monthlyIncome > 0 ? [
+      {
+        id: `inc-${Date.now()}`,
+        amount: monthlyIncome,
+        source: 'Salary',
+        description: 'Monthly Income',
+        date: new Date().toISOString().split('T')[0],
+      },
+    ] : [];
+
+    // Reset logged expenses, extra items, goals, and bills
     setExpenses([]);
-    setIncomes([]);
+    setIncomes(baseIncomes);
     setUpcomingBills([]);
     setSavingsGoals([]);
-    setBudgets({
-      Food: 0,
-      Transportation: 0,
-      Bills: 0,
-      Health: 0,
-      Shopping: 0,
-      Entertainment: 0,
-      Education: 0,
-      Other: 0,
-    });
+    
+    // Maintain standard category budget allocations based on their income
+    const cleanBudgets = {
+      Food: Math.round(monthlyIncome * 0.22),
+      Transportation: Math.round(monthlyIncome * 0.10),
+      Bills: Math.round(monthlyIncome * 0.15),
+      Health: Math.round(monthlyIncome * 0.05),
+      Shopping: Math.round(monthlyIncome * 0.10),
+      Entertainment: Math.round(monthlyIncome * 0.08),
+      Education: Math.round(monthlyIncome * 0.05),
+      Other: Math.round(monthlyIncome * 0.05),
+    };
+    setBudgets(cleanBudgets);
+
     setNotifications([
       {
         id: `notif-${Date.now()}`,
         type: 'spending_reminder',
         title: 'Account Data Reset',
-        message: 'All your logged expenses, incomes, budgets, and savings goals have been reset.',
+        message: 'Your spending data has been cleared. Your available balance is intact and ready for this month.',
         time: 'Just now',
         read: false,
         badge: 'info',
@@ -429,28 +445,16 @@ export default function Home() {
       {
         id: `msg-${Date.now()}`,
         sender: 'ai',
-        text: `Hello ${user?.name || 'there'}! Your profile records have been reset clean. I'm ready to track and analyze your ${currentMonth} finances as you log new transactions!`,
+        text: `Hello ${user?.name || 'there'}! Your spending records have been reset clean. Your available balance is ready, and I will track your ${currentMonth} finances as you log new transactions.`,
         time: 'Just now',
       },
     ]);
     try {
       localStorage.setItem('finsmart_expenses', JSON.stringify([]));
-      localStorage.setItem('finsmart_incomes', JSON.stringify([]));
+      localStorage.setItem('finsmart_incomes', JSON.stringify(baseIncomes));
       localStorage.setItem('finsmart_goals', JSON.stringify([]));
       localStorage.setItem('finsmart_bills', JSON.stringify([]));
-      localStorage.setItem(
-        'finsmart_budgets',
-        JSON.stringify({
-          Food: 0,
-          Transportation: 0,
-          Bills: 0,
-          Health: 0,
-          Shopping: 0,
-          Entertainment: 0,
-          Education: 0,
-          Other: 0,
-        })
-      );
+      localStorage.setItem('finsmart_budgets', JSON.stringify(cleanBudgets));
     } catch (e) {
       console.error('Error saving reset state:', e);
     }
