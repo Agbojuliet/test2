@@ -62,7 +62,7 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
       }
 
       setResendCooldown(30);
-      setSuccessMsg(`Verification code sent to ${targetEmail.trim()}`);
+      setSuccessMsg('Verification code sent to ' + targetEmail.trim());
       return true;
     } catch (err) {
       setError(err.message || 'An unexpected error occurred. Please try again.');
@@ -197,7 +197,6 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
       {/* SCREEN 1: SPLASH & WELCOME */}
       {screen === 'welcome' && (
         <div style={{ textAlign: 'center' }}>
-          {/* Animated Glowing Logo */}
           <div
             style={{
               width: '80px',
@@ -245,7 +244,6 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
             <span style={{ color: '#fff', fontWeight: 600 }}>&ldquo;How am I doing financially this month?&rdquo;</span>
           </p>
 
-          {/* Core Feature Highlights */}
           <div
             style={{
               background: 'var(--bg-card)',
@@ -326,7 +324,6 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <button
               type="button"
@@ -537,7 +534,7 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
               <span>{email}</span>
             </div>
             <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '6px' }}>
-              (If you don&apos;t see it in your inbox, please check your spam folder)
+              (If you don&apos;t see it in your inbox, please check your spam/promotions folder)
             </p>
           </div>
 
@@ -575,7 +572,6 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
           )}
 
           <form onSubmit={handleVerifySubmit}>
-            {/* 6 Digit Input Group */}
             <div
               style={{
                 display: 'flex',
@@ -630,7 +626,6 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
             </button>
           </form>
 
-          {/* Resend Action */}
           <div style={{ textAlign: 'center', marginTop: '18px', fontSize: '13px', color: 'var(--text-secondary)' }}>
             Didn&apos;t receive the email?{' '}
             {resendCooldown > 0 ? (
