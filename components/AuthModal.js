@@ -1,26 +1,159 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Icon from './Icons';
 
 export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
-  const [mode, setMode] = useState('welcome'); // 'welcome' | 'login' | 'signup'
+  const [mode, setMode] = useState('welcome'); // 'welcome' | 'login' | 'signup' | 'verify'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+
+  // Email OTP states
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [isSendingCode, setIsSendingCode] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [devCode, setDevCode] = useState(null);
+
+  const otpInputsRef = useRef([]);
+
+  useEffect(() => {
+    let timer;
+    if (resendCooldown > 0) {
+      timer = setInterval(() => {
+        setResendCooldown((prev) => (prev > 1 ? prev - 1 : 0));
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+  useEffect(() => {
+    if (mode === 'verify' && otpInputsRef.current[0]) {
+      setTimeout(() => {
+        otpInputsRef.current[0]?.focus();
+      }, 150);
+    }
+  }, [mode]);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const sendVerificationCode = async (targetEmail, targetName) => {
+    setIsSendingCode(true);
+    setError('');
+    setSuccessMsg('');
+
+    try {
+      const res = await fetch('/api/auth/send-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: targetEmail.trim(),
+          name: targetName.trim(),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to send verification code.');
+      }
+
+      setDevCode(data.devCode || null);
+      setResendCooldown(30);
+      setSuccessMsg(`Code sent to ${targetEmail.trim()}`);
+      return true;
+    } catch (err) {
+      setError(err.message || 'Error sending code.');
+      return false;
+    } finally {
+      setIsSendingCode(false);
+    }
+  };
+
+  const handleSignupSubmit = async (e) => {
+    e.preventDefault();
+    if (!email || !password || !name) {
+      setError('Please fill in all fields');
+      return;
+    }
+
+    const sent = await sendVerificationCode(email, name);
+    if (sent) {
+      setOtp(['', '', '', '', '', '']);
+      setMode('verify');
+    }
+  };
+
+  const handleVerifySubmit = async (e) => {
+    e.preventDefault();
+    const fullCode = otp.join('');
+    if (fullCode.length !== 6) {
+      setError('Enter 6-digit verification code');
+      return;
+    }
+
+    setIsVerifying(true);
+    setError('');
+
+    try {
+      const res = await fetch('/api/auth/verify-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email.trim(),
+          code: fullCode,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Invalid verification code.');
+      }
+
+      onLoginSuccess({
+        email,
+        name: name || 'Amaka Juliet',
+        isNewUser: true,
+      });
+      onClose();
+    } catch (err) {
+      setError(err.message || 'Verification failed.');
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleLoginSubmit = (e) => {
     e.preventDefault();
     if (!email || !password) return;
 
     onLoginSuccess({
       email,
-      name: name || (mode === 'signup' ? 'New Member' : 'Amaka Juliet'),
-      isNewUser: mode === 'signup',
+      name: email.split('@')[0] || 'Member',
+      isNewUser: false,
     });
     onClose();
+  };
+
+  const handleOtpChange = (index, value) => {
+    const digit = value.replace(/\D/g, '').slice(-1);
+    const newOtp = [...otp];
+    newOtp[index] = digit;
+    setOtp(newOtp);
+
+    if (digit && index < 5) {
+      otpInputsRef.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      otpInputsRef.current[index - 1]?.focus();
+    }
   };
 
   return (
@@ -78,7 +211,10 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
               <button
                 type="button"
                 className="btn-primary"
-                onClick={() => setMode('signup')}
+                onClick={() => {
+                  setError('');
+                  setMode('signup');
+                }}
               >
                 <Icon name="user" size={18} />
                 <span>Sign Up</span>
@@ -86,7 +222,10 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
               <button
                 type="button"
                 className="btn-secondary"
-                onClick={() => setMode('login')}
+                onClick={() => {
+                  setError('');
+                  setMode('login');
+                }}
               >
                 <Icon name="log-in" size={18} />
                 <span>Log In</span>
@@ -105,7 +244,11 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
               Sign in to manage your budget and view live insights
             </p>
 
-            <form onSubmit={handleSubmit}>
+            {error && (
+              <div style={{ color: '#fca5a5', fontSize: '12px', marginBottom: '12px' }}>{error}</div>
+            )}
+
+            <form onSubmit={handleLoginSubmit}>
               <div className="form-group">
                 <label className="form-label">Email Address</label>
                 <input
@@ -139,7 +282,10 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
               Don&apos;t have an account?{' '}
               <span
                 style={{ color: 'var(--primary-light)', cursor: 'pointer', fontWeight: 600 }}
-                onClick={() => setMode('signup')}
+                onClick={() => {
+                  setError('');
+                  setMode('signup');
+                }}
               >
                 Sign Up
               </span>
@@ -157,7 +303,11 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
               Start tracking spending with personalized AI guidance
             </p>
 
-            <form onSubmit={handleSubmit}>
+            {error && (
+              <div style={{ color: '#fca5a5', fontSize: '12px', marginBottom: '12px' }}>{error}</div>
+            )}
+
+            <form onSubmit={handleSignupSubmit}>
               <div className="form-group">
                 <label className="form-label">Full Name</label>
                 <input
@@ -194,8 +344,13 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                 />
               </div>
 
-              <button type="submit" className="btn-primary" style={{ marginTop: '16px' }}>
-                Create Account
+              <button
+                type="submit"
+                className="btn-primary"
+                disabled={isSendingCode}
+                style={{ marginTop: '16px' }}
+              >
+                {isSendingCode ? 'Sending Code...' : 'Verify Email →'}
               </button>
             </form>
 
@@ -203,10 +358,112 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
               Already have an account?{' '}
               <span
                 style={{ color: 'var(--primary-light)', cursor: 'pointer', fontWeight: 600 }}
-                onClick={() => setMode('login')}
+                onClick={() => {
+                  setError('');
+                  setMode('login');
+                }}
               >
                 Sign In
               </span>
+            </div>
+          </div>
+        )}
+
+        {/* VERIFICATION FORM */}
+        {mode === 'verify' && (
+          <div>
+            <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#fff', marginBottom: '4px' }}>
+              Verify Email
+            </h3>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '16px' }}>
+              Enter 6-digit code sent to <strong style={{ color: '#fff' }}>{email}</strong>
+            </p>
+
+            {error && (
+              <div style={{ color: '#fca5a5', fontSize: '12px', marginBottom: '12px' }}>{error}</div>
+            )}
+            {successMsg && !error && (
+              <div style={{ color: 'var(--primary-light)', fontSize: '12px', marginBottom: '12px' }}>
+                {successMsg}
+              </div>
+            )}
+
+            {devCode && (
+              <div
+                style={{
+                  background: 'rgba(59, 130, 246, 0.15)',
+                  border: '1px dashed rgba(59, 130, 246, 0.4)',
+                  borderRadius: '8px',
+                  padding: '8px 10px',
+                  marginBottom: '14px',
+                  fontSize: '11px',
+                  color: '#93c5fd',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <span>💡 Demo Code: <strong>{devCode}</strong></span>
+                <span
+                  style={{ textDecoration: 'underline', cursor: 'pointer', fontWeight: 700 }}
+                  onClick={() => setOtp(devCode.split(''))}
+                >
+                  Fill
+                </span>
+              </div>
+            )}
+
+            <form onSubmit={handleVerifySubmit}>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', margin: '14px 0 18px 0' }}>
+                {otp.map((digit, idx) => (
+                  <input
+                    key={idx}
+                    ref={(el) => (otpInputsRef.current[idx] = el)}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleOtpChange(idx, e.target.value)}
+                    onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                    style={{
+                      width: '38px',
+                      height: '46px',
+                      borderRadius: '10px',
+                      background: 'var(--bg-input, #1e293b)',
+                      border: digit
+                        ? '2px solid var(--primary, #10b981)'
+                        : '1px solid rgba(255, 255, 255, 0.15)',
+                      color: '#ffffff',
+                      fontSize: '18px',
+                      fontWeight: 800,
+                      textAlign: 'center',
+                      outline: 'none',
+                    }}
+                  />
+                ))}
+              </div>
+
+              <button
+                type="submit"
+                className="btn-primary"
+                disabled={isVerifying || otp.join('').length !== 6}
+                style={{ width: '100%' }}
+              >
+                {isVerifying ? 'Verifying...' : 'Verify & Enter'}
+              </button>
+            </form>
+
+            <div style={{ textAlign: 'center', marginTop: '12px', fontSize: '11px', color: 'var(--text-muted)' }}>
+              {resendCooldown > 0 ? (
+                <span>Resend in {resendCooldown}s</span>
+              ) : (
+                <span
+                  style={{ color: 'var(--primary-light)', cursor: 'pointer', fontWeight: 600 }}
+                  onClick={() => sendVerificationCode(email, name)}
+                >
+                  Resend Code
+                </span>
+              )}
             </div>
           </div>
         )}
