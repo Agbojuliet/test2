@@ -16,7 +16,6 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
   const [isSendingCode, setIsSendingCode] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
-  const [devCode, setDevCode] = useState(null);
 
   const otpInputsRef = useRef([]);
 
@@ -61,7 +60,6 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
         throw new Error(data.error || 'Failed to send verification code.');
       }
 
-      setDevCode(data.devCode || null);
       setResendCooldown(30);
       setSuccessMsg(`Code sent to ${targetEmail.trim()}`);
       return true;
@@ -385,31 +383,6 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
             {successMsg && !error && (
               <div style={{ color: 'var(--primary-light)', fontSize: '12px', marginBottom: '12px' }}>
                 {successMsg}
-              </div>
-            )}
-
-            {devCode && (
-              <div
-                style={{
-                  background: 'rgba(59, 130, 246, 0.15)',
-                  border: '1px dashed rgba(59, 130, 246, 0.4)',
-                  borderRadius: '8px',
-                  padding: '8px 10px',
-                  marginBottom: '14px',
-                  fontSize: '11px',
-                  color: '#93c5fd',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <span>💡 Demo Code: <strong>{devCode}</strong></span>
-                <span
-                  style={{ textDecoration: 'underline', cursor: 'pointer', fontWeight: 700 }}
-                  onClick={() => setOtp(devCode.split(''))}
-                >
-                  Fill
-                </span>
               </div>
             )}
 

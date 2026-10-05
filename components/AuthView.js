@@ -16,7 +16,6 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
   const [isSendingCode, setIsSendingCode] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
-  const [devCode, setDevCode] = useState(null);
 
   const otpInputsRef = useRef([]);
 
@@ -62,9 +61,8 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
         throw new Error(data.error || 'Failed to send verification code.');
       }
 
-      setDevCode(data.devCode || null);
-      setResendCooldown(15);
-      setSuccessMsg(`Verification code generated for ${targetEmail.trim()}`);
+      setResendCooldown(30);
+      setSuccessMsg(`Verification code sent to ${targetEmail.trim()}`);
       return true;
     } catch (err) {
       setError(err.message || 'An unexpected error occurred. Please try again.');
@@ -132,16 +130,6 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
     }
   };
 
-  // Auto-fill dev code helper
-  const handleAutoFillDevCode = () => {
-    if (!devCode) return;
-    const digits = devCode.split('').slice(0, 6);
-    setOtp(digits);
-    if (otpInputsRef.current[5]) {
-      otpInputsRef.current[5].focus();
-    }
-  };
-
   // Handle OTP Verification submission
   const handleVerifySubmit = async (e) => {
     e.preventDefault();
@@ -168,7 +156,7 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Verification failed. Please check the code.');
+        throw new Error(data.error || 'Verification failed. Please check the code in your email.');
       }
 
       // Success -> Proceed to Onboarding
@@ -548,6 +536,9 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
             >
               <span>{email}</span>
             </div>
+            <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '6px' }}>
+              (If you don&apos;t see it in your inbox, please check your spam folder)
+            </p>
           </div>
 
           {error && (
@@ -580,43 +571,6 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
               }}
             >
               {successMsg}
-            </div>
-          )}
-
-          {/* Dev Mode Code Quick-Fill Helper */}
-          {devCode && (
-            <div
-              style={{
-                background: 'rgba(59, 130, 246, 0.12)',
-                border: '1px dashed rgba(59, 130, 246, 0.4)',
-                borderRadius: 'var(--radius-md)',
-                padding: '10px 12px',
-                marginBottom: '16px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                fontSize: '12px',
-              }}
-            >
-              <div style={{ color: '#93c5fd' }}>
-                💡 Test Code: <strong style={{ letterSpacing: '1px', color: '#fff' }}>{devCode}</strong>
-              </div>
-              <button
-                type="button"
-                onClick={handleAutoFillDevCode}
-                style={{
-                  background: 'rgba(59, 130, 246, 0.25)',
-                  border: '1px solid rgba(59, 130, 246, 0.4)',
-                  color: '#bfdbfe',
-                  borderRadius: '6px',
-                  padding: '4px 8px',
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                }}
-              >
-                Auto-fill
-              </button>
             </div>
           )}
 
