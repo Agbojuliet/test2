@@ -1,9 +1,23 @@
 {
   "agbojuliet59@gmail.com": {
-    "code": "178917",
+    "code": "742088",
     "name": "Juliet",
-    "expiresAt": 1791202331001,
+    "expiresAt": 1791206057177,
     "attempts": 0,
-    "lastSentAt": 1791201731001
+    "lastSentAt": 1791205457177
+  },
+  "testrecipient12345@gmail.com": {
+    "code": "793340",
+    "name": "New User",
+    "expiresAt": 1791203144929,
+    "attempts": 0,
+    "lastSentAt": 1791202544929
+  },
+  "hello.developer.test@gmail.com": {
+    "code": "121972",
+    "name": "Alex",
+    "expiresAt": 1791206109270,
+    "attempts": 0,
+    "lastSentAt": 1791205509270
   }
 }
