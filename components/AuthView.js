@@ -63,8 +63,8 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
       }
 
       setDevCode(data.devCode || null);
-      setResendCooldown(30);
-      setSuccessMsg(`Verification code sent to ${targetEmail.trim()}`);
+      setResendCooldown(15);
+      setSuccessMsg(`Verification code generated for ${targetEmail.trim()}`);
       return true;
     } catch (err) {
       setError(err.message || 'An unexpected error occurred. Please try again.');
