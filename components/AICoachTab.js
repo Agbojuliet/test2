@@ -12,6 +12,7 @@ export default function AICoachTab({
   onRetryLastMessage,
   currencyCode = 'NGN',
   currencySymbol = '₦',
+  userName,
 }) {
   const [activeSection, setActiveSection] = useState('insights'); // 'insights' | 'chat'
   const [inputText, setInputText] = useState('');
@@ -202,9 +203,15 @@ export default function AICoachTab({
           <div className="chat-messages-area">
             {chatMessages.map((msg) => {
               const isAi = msg.sender === 'ai' || msg.role === 'assistant';
+              let textContent = msg.text || msg.content || '';
+              if (msg.id === 'msg-1' || textContent.includes('Hello Amaka!')) {
+                const firstName = userName?.trim() ? userName.trim().split(' ')[0] : 'there';
+                textContent = textContent.replace(/Hello\s+[A-Za-z0-9_.-]+!/i, `Hello ${firstName}!`);
+              }
+
               return (
                 <div key={msg.id || `${msg.time}-${Math.random()}`} className={`chat-bubble ${isAi ? 'ai' : 'user'}`}>
-                  <div style={{ whiteSpace: 'pre-line' }}>{msg.text || msg.content}</div>
+                  <div style={{ whiteSpace: 'pre-line' }}>{textContent}</div>
                   <div
                     style={{
                       fontSize: '10px',

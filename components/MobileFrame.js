@@ -23,13 +23,13 @@ export default function MobileFrame({
             <header className="app-header">
               <div className="user-profile-badge" onClick={onOpenSettings}>
                 <div className="user-avatar">
-                  {user?.name ? user.name[0] : 'A'}
+                  {user?.name?.trim() ? user.name.trim()[0].toUpperCase() : 'U'}
                 </div>
                 <div>
                   <div className="greeting-text">
                     {user?.isNewUser ? 'Welcome' : 'Welcome back'}
                   </div>
-                  <div className="user-name">{user?.name || 'Amaka Juliet'}</div>
+                  <div className="user-name">{user?.name?.trim() || 'Member'}</div>
                 </div>
               </div>
 

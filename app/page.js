@@ -32,6 +32,7 @@ import {
   INITIAL_SAVINGS_GOALS,
   INITIAL_NOTIFICATIONS,
   INITIAL_CHAT_MESSAGES,
+  getInitialChatMessage,
 } from '@/lib/initialData';
 import { generateAIInsights } from '@/lib/ai-engine';
 import { CURRENCIES } from '@/lib/currency';
@@ -133,6 +134,9 @@ export default function Home() {
       isNewUser: Boolean(isNewUser),
     }));
 
+    const displayName = name || (email ? email.split('@')[0] : 'Member');
+    const firstName = displayName.trim().split(' ')[0];
+
     if (isNewUser) {
       // Clear all demo prefilled data for new signups
       setExpenses([]);
@@ -154,13 +158,24 @@ export default function Home() {
         {
           id: `msg-${Date.now()}`,
           sender: 'ai',
-          text: `Hello ${name || 'there'}! I am your AI Budget Assistant. Your dashboard is brand new and clean. Record your first expense or income to begin tracking your financial health!`,
+          text: `Hello ${firstName}! I am your AI Budget Assistant. Your dashboard is brand new and clean. Record your first expense or income to begin tracking your financial health!`,
           time: 'Just now',
         },
       ]);
       setOnboardingOpen(true);
     } else {
       // Returning user login / demo -> Direct entry to dashboard
+      setChatMessages((prev) => {
+        if (!prev || prev.length <= 1) {
+          return [getInitialChatMessage(firstName)];
+        }
+        return prev.map((m) => {
+          if (m.id === 'msg-1' || m.id?.startsWith('msg-') || (m.text && m.text.includes('Hello '))) {
+            return getInitialChatMessage(firstName);
+          }
+          return m;
+        });
+      });
       setIsAuthenticated(true);
       try {
         localStorage.setItem('finsmart_auth', 'true');
@@ -538,6 +553,7 @@ export default function Home() {
               onRetryLastMessage={() => handleSendChatMessage(lastUserMessage)}
               currencyCode={currencyCode}
               currencySymbol={currencySymbol}
+              userName={user?.name}
             />
           )}
 
