@@ -5,7 +5,7 @@ export const runtime = 'nodejs';
 
 export async function POST(request) {
   try {
-    const { email, code } = await request.json();
+    const { email, code, token, otpToken } = await request.json();
 
     if (!email || !code) {
       return NextResponse.json(
@@ -14,7 +14,8 @@ export async function POST(request) {
       );
     }
 
-    const verification = verifyOtp(email, code);
+    const activeToken = token || otpToken || null;
+    const verification = verifyOtp(email, code, activeToken);
 
     if (!verification.valid) {
       return NextResponse.json(

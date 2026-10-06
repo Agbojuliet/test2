@@ -13,6 +13,7 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
 
   // Email OTP Verification States
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otpToken, setOtpToken] = useState('');
   const [isSendingCode, setIsSendingCode] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
@@ -59,6 +60,14 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
 
       if (!res.ok || !data.success) {
         throw new Error(data.error || 'Failed to send verification code.');
+      }
+
+      const receivedToken = data.token || data.otpToken || '';
+      if (receivedToken) {
+        setOtpToken(receivedToken);
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem(`finsmart_otp_token_${targetEmail.trim().toLowerCase()}`, receivedToken);
+        }
       }
 
       setResendCooldown(30);
@@ -143,6 +152,11 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
     setError('');
     setSuccessMsg('');
 
+    let tokenToUse = otpToken;
+    if (!tokenToUse && typeof window !== 'undefined') {
+      tokenToUse = sessionStorage.getItem(`finsmart_otp_token_${email.trim().toLowerCase()}`) || '';
+    }
+
     try {
       const res = await fetch('/api/auth/verify-code', {
         method: 'POST',
@@ -150,6 +164,7 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
         body: JSON.stringify({
           email: email.trim(),
           code: fullCode,
+          token: tokenToUse,
         }),
       });
 
@@ -157,6 +172,11 @@ export default function AuthView({ onAuthSuccess, onGuestLogin }) {
 
       if (!res.ok || !data.success) {
         throw new Error(data.error || 'Verification failed. Please check the code in your email.');
+      }
+
+      // Clear cached token
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem(`finsmart_otp_token_${email.trim().toLowerCase()}`);
       }
 
       // Success -> Proceed to Onboarding

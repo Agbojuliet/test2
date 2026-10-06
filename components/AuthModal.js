@@ -13,6 +13,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
 
   // Email OTP states
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otpToken, setOtpToken] = useState('');
   const [isSendingCode, setIsSendingCode] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
@@ -60,6 +61,14 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
         throw new Error(data.error || 'Failed to send verification code.');
       }
 
+      const receivedToken = data.token || data.otpToken || '';
+      if (receivedToken) {
+        setOtpToken(receivedToken);
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem(`finsmart_otp_token_${targetEmail.trim().toLowerCase()}`, receivedToken);
+        }
+      }
+
       setResendCooldown(30);
       setSuccessMsg(`Code sent to ${targetEmail.trim()}`);
       return true;
@@ -96,6 +105,11 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
     setIsVerifying(true);
     setError('');
 
+    let tokenToUse = otpToken;
+    if (!tokenToUse && typeof window !== 'undefined') {
+      tokenToUse = sessionStorage.getItem(`finsmart_otp_token_${email.trim().toLowerCase()}`) || '';
+    }
+
     try {
       const res = await fetch('/api/auth/verify-code', {
         method: 'POST',
@@ -103,6 +117,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
         body: JSON.stringify({
           email: email.trim(),
           code: fullCode,
+          token: tokenToUse,
         }),
       });
 
@@ -110,6 +125,11 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
 
       if (!res.ok || !data.success) {
         throw new Error(data.error || 'Invalid verification code.');
+      }
+
+      // Clear cached token
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem(`finsmart_otp_token_${email.trim().toLowerCase()}`);
       }
 
       onLoginSuccess({
